@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Querify - Intelligent Document Query</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div class="app">
+  <header class="header">
+    <div class="header-content">
+      <h1>✨ Querify</h1>
+      <p class="tagline">Turns the act of querying documents into a simple verb.</p>
+      <p class="subtitle">Upload a PDF, DOCX, or TXT and ask questions</p>
+    </div>
+    <button id="profile-btn" class="profile-btn" onclick="openProfileModal()">
+      <i class="fas fa-user-circle"></i> Profile
+    </button>
+  </header>
+
+  <section id="chat" class="chat-box"></section>
+
+  <footer class="input-box">
+    <div class="file-upload-area">
+      <input type="file" id="file" accept=".pdf,.txt,.docx,.doc" style="display: none;" />
+      <button class="file-btn" onclick="triggerFileUpload()" title="Upload file">
+        <i class="fas fa-paperclip"></i>
+      </button>
+      <span id="filename-display" class="filename-display"></span>
+    </div>
+    <input type="text" id="msg" placeholder="Ask something about the uploaded document..." />
+    <button id="send-btn" onclick="sendMsg()" class="send-btn active">
+      <i class="fas fa-paper-plane"></i>
+    </button>
+  </footer>
+</div>
+
+<!-- Profile Modal -->
+<div id="profile-modal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeProfileModal()">&times;</span>
+    <h2>User Profile</h2>
+    <form id="profile-form" onsubmit="saveProfile(event)">
+      <div class="form-group">
+        <label for="profile-name">Name:</label>
+        <input type="text" id="profile-name" placeholder="Enter your name" />
+      </div>
+      <div class="form-group">
+        <label for="profile-email">Email:</label>
+        <input type="email" id="profile-email" placeholder="Enter your email" />
+      </div>
+      <div class="form-group">
+        <label for="profile-phone">Phone:</label>
+        <input type="tel" id="profile-phone" placeholder="Enter your phone number" />
+      </div>
+      <div class="form-group">
+        <label for="profile-bio">Bio:</label>
+        <textarea id="profile-bio" placeholder="Tell us about yourself..."></textarea>
+      </div>
+      <button type="submit" class="save-btn">Save Profile</button>
+      <button type="button" class="cancel-btn" onclick="closeProfileModal()">Cancel</button>
+    </form>
+  </div>
+</div>
+
+<script src="/static/chat.js"></script>
+</body>
+</html>

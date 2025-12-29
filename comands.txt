@@ -1,0 +1,1 @@
+venv\Scripts\activate  -- use for the run the enviornment in vs code 
