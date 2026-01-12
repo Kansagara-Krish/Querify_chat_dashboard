@@ -34,6 +34,7 @@ Rules:
  - Use ASCII-safe bullets (- or numbered lists) to ensure compatibility across editors and terminals.
  - Avoid unnecessary commentary, filler text, or excessive emojis.
  - Don't use ** or * for bold or italics or for point.
+ - Dont give extra space between two lines in any point
 
 Context:
 {context}
@@ -82,6 +83,7 @@ class SimpleQAChain:
         # Check if it's a summarize request
         is_summarize = self._is_summarize_request(query)
         requested_lines = self._extract_requested_lines(query) if is_summarize else 3
+        source_files = set()  # Track which files are used
         
         try:
             try:
@@ -93,6 +95,11 @@ class SimpleQAChain:
             
             if not docs or len(docs) == 0:
                 return "Not found in the document."
+            
+            # Extract source filenames from metadata
+            for doc in docs:
+                if hasattr(doc, 'metadata') and doc.metadata and 'source' in doc.metadata:
+                    source_files.add(doc.metadata['source'])
             
             if is_summarize:
                 # For summarize requests, combine multiple excerpts to get more content
@@ -134,6 +141,11 @@ class SimpleQAChain:
                     content = content[:last_period + 1]
                 else:
                     content = content + "..."
+            
+            # Add source file information
+            if source_files:
+                source_text = ", ".join(sorted(source_files))
+                content = content + "\n\n[Source: " + source_text + "]"
             
             return content
             
@@ -308,11 +320,33 @@ def build_qa_chain(vectorstore: Any):
                 retriever=retriever,
                 chain_type="stuff",
                 chain_type_kwargs={"prompt": QA_PROMPT},
-                return_source_documents=False,
+                return_source_documents=True,
             )
 
-            # Return the RetrievalQA chain directly so queries go to the LLM
-            return retrieval_qa
+            # Wrap to extract and append source information
+            class QAWithSources:
+                def __init__(self, qa_chain):
+                    self.qa_chain = qa_chain
+                
+                def run(self, query: str) -> str:
+                    result = self.qa_chain({"query": query})
+                    answer = result.get("result", "")
+                    
+                    # Extract source files from documents
+                    source_files = set()
+                    if "source_documents" in result:
+                        for doc in result["source_documents"]:
+                            if hasattr(doc, 'metadata') and doc.metadata and 'source' in doc.metadata:
+                                source_files.add(doc.metadata['source'])
+                    
+                    # Append source information
+                    if source_files and answer:
+                        source_text = ", ".join(sorted(source_files))
+                        answer = answer + "\n\n[Source: " + source_text + "]"
+                    
+                    return answer
+            
+            return QAWithSources(retrieval_qa)
 
         except Exception as e:
             logger.warning("LLM init failed, using fallback: %s", e)

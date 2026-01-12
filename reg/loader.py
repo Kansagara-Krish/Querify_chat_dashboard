@@ -1,11 +1,7 @@
 from langchain_community.document_loaders import PyPDFLoader, TextLoader, Docx2txtLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import FAISS
 from reg.embeddings import get_embeddings, BasicEmbeddings
-try:
-    from langchain.vectorstores import FAISS
-except Exception:
-    # Some environments provide FAISS via community package
-    from langchain_community.vectorstores import FAISS
 import logging
 
 logger = logging.getLogger(__name__)
@@ -15,10 +11,13 @@ def load_file_to_vectorstore(file_path: str):
     """Load a file (pdf, txt, docx) and create a FAISS vectorstore.
 
     The function auto-detects the loader based on file extension and
-    falls back to a text loader when unsure.
+    falls back to a text loader when unsure. Adds source filename metadata.
     """
     try:
+        import os
         fname = file_path.lower()
+        source_filename = os.path.basename(file_path)
+        
         if fname.endswith(".pdf"):
             loader = PyPDFLoader(file_path)
             docs = loader.load()
@@ -36,6 +35,12 @@ def load_file_to_vectorstore(file_path: str):
             except Exception as e:
                 logger.error("Unsupported file type or failed to load: %s", e)
                 raise
+        
+        # Add source filename metadata to all documents
+        for doc in docs:
+            if doc.metadata is None:
+                doc.metadata = {}
+            doc.metadata["source"] = source_filename
 
         # Use larger chunks to preserve context and meaning
         splitter = RecursiveCharacterTextSplitter(

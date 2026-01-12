@@ -14,7 +14,7 @@ if os.getenv("OPENROUTER_API_KEY") and not os.getenv("OPENAI_API_KEY"):
     os.environ["OPENAI_API_KEY"] = os.environ.get("OPENROUTER_API_KEY")
     os.environ["OPENAI_API_BASE"] = os.environ.get("OPENAI_API_BASE", "https://openrouter.ai/api/v1")
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path="/", static_folder=".")
 
 vectorstore = None
 qa_chain = None

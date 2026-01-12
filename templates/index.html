@@ -2,67 +2,222 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Querify - Intelligent Document Query</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Querify - Intelligent Document Q&A System</title>
   <link rel="stylesheet" href="/static/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
 <div class="app">
+  <!-- Header -->
   <header class="header">
-    <div class="header-content">
-      <h1>✨ Querify</h1>
-      <p class="tagline">Turns the act of querying documents into a simple verb.</p>
-      <p class="subtitle">Upload a PDF, DOCX, or TXT and ask questions</p>
+    <div class="header-left">
+      <div class="logo-section">
+        <img src="/images/logo.png" alt="Querify Logo" class="logo-img">
+        <div class="header-text">
+          <h1 class="app-title">Querify</h1>
+          <p class="app-subtitle">Intelligent Document Q&A System</p>
+        </div>
+      </div>
     </div>
-    <button id="profile-btn" class="profile-btn" onclick="openProfileModal()">
-      <i class="fas fa-user-circle"></i> Profile
-    </button>
+
+    <div class="header-right">
+      <div class="user-profile-section">
+        <div class="user-avatar" id="user-avatar" onclick="openProfileModal()">
+          <i class="fas fa-user"></i>
+        </div>
+        <button id="profile-btn" class="profile-btn" onclick="openProfileModal()">
+          <i class="fas fa-user-circle"></i>
+          <span id="user-name-display">Profile</span>
+        </button>
+      </div>
+    </div>
   </header>
 
-  <section id="chat" class="chat-box"></section>
+  <!-- Main Content Container -->
+  <div class="main-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h3 class="sidebar-title">
+          <i class="fas fa-file-upload"></i> Documents
+        </h3>
+        <button class="sidebar-toggle-mobile" onclick="toggleSidebar()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
 
-  <footer class="input-box">
-    <div class="file-upload-area">
-      <input type="file" id="file" accept=".pdf,.txt,.docx,.doc" style="display: none;" />
-      <button class="file-btn" onclick="triggerFileUpload()" title="Upload file">
-        <i class="fas fa-paperclip"></i>
-      </button>
-      <span id="filename-display" class="filename-display"></span>
+      <div class="upload-section">
+        <label for="file" class="drag-drop-area" id="drag-drop-area">
+          <div class="drag-drop-content">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p class="drag-drop-text">Drag and drop your file here</p>
+            <p class="drag-drop-subtext">or click to browse</p>
+            <div class="supported-formats">
+              <span class="format-badge">
+                <i class="fas fa-file-pdf"></i> PDF
+              </span>
+              <span class="format-badge">
+                <i class="fas fa-file-word"></i> DOCX
+              </span>
+              <span class="format-badge">
+                <i class="fas fa-file-alt"></i> TXT
+              </span>
+            </div>
+          </div>
+          <input type="file" id="file" accept=".pdf,.txt,.docx,.doc" style="display: none;" />
+        </label>
+        <div class="upload-progress" id="upload-progress" style="display: none;">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+          <p class="progress-text">Uploading...</p>
+        </div>
+      </div>
+
+      <div class="documents-list">
+        <h4 class="documents-title">Loaded Documents</h4>
+        <div id="documents-container" class="documents-container">
+          <p class="no-documents">No documents loaded yet</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Chat Area -->
+    <div class="chat-wrapper">
+      <!-- Chat Messages -->
+      <div id="chat" class="chat-box">
+        <div class="chat-welcome">
+          <div class="welcome-icon">
+            <i class="fas fa-comments"></i>
+          </div>
+          <h2 class="welcome-title">Welcome to Querify</h2>
+          <p class="welcome-text">Upload a document to get started with your intelligent Q&A session</p>
+          <div class="welcome-tips">
+            <p class="tip-title">Quick Tips:</p>
+            <ul>
+              <li>Upload PDF, DOCX, or TXT files</li>
+              <li>Ask specific questions about your document</li>
+              <li>Use clear and concise language</li>
+              <li>Review answers and ask follow-up questions</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Area -->
+      <div class="input-section">
+        <div class="input-wrapper">
+          <div class="input-actions-left">
+            <button class="action-btn attach-btn" onclick="triggerFileUpload()" title="Attach file">
+              <i class="fas fa-paperclip"></i>
+            </button>
+            <button class="action-btn clear-btn" onclick="clearChat()" title="Clear chat">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+
+          <div class="message-input-container">
+            <input 
+              type="text" 
+              id="msg" 
+              class="message-input"
+              placeholder="Ask a question about your document..."
+              autocomplete="off"
+            />
+            <span class="character-count">
+              <span id="char-count">0</span>/500
+            </span>
+          </div>
+
+          <div class="input-actions-right">
+            <button class="action-btn" onclick="toggleVoiceInput()" title="Voice input (beta)" id="voice-btn">
+              <i class="fas fa-microphone"></i>
+            </button>
+            <button id="send-btn" class="send-btn" onclick="sendMsg()" title="Send message">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-    <input type="text" id="msg" placeholder="Ask something about the uploaded document..." />
-    <button id="send-btn" onclick="sendMsg()" class="send-btn active">
-      <i class="fas fa-paper-plane"></i>
-    </button>
-  </footer>
-</div>
-
-<!-- Profile Modal -->
-<div id="profile-modal" class="modal">
-  <div class="modal-content">
-    <span class="close-btn" onclick="closeProfileModal()">&times;</span>
-    <h2>User Profile</h2>
-    <form id="profile-form" onsubmit="saveProfile(event)">
-      <div class="form-group">
-        <label for="profile-name">Name:</label>
-        <input type="text" id="profile-name" placeholder="Enter your name" />
-      </div>
-      <div class="form-group">
-        <label for="profile-email">Email:</label>
-        <input type="email" id="profile-email" placeholder="Enter your email" />
-      </div>
-      <div class="form-group">
-        <label for="profile-phone">Phone:</label>
-        <input type="tel" id="profile-phone" placeholder="Enter your phone number" />
-      </div>
-      <div class="form-group">
-        <label for="profile-bio">Bio:</label>
-        <textarea id="profile-bio" placeholder="Tell us about yourself..."></textarea>
-      </div>
-      <button type="submit" class="save-btn">Save Profile</button>
-      <button type="button" class="cancel-btn" onclick="closeProfileModal()">Cancel</button>
-    </form>
   </div>
+
+  <!-- Profile Modal -->
+  <div id="profile-modal" class="modal">
+    <div class="modal-overlay" onclick="closeProfileModal()"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>User Profile</h2>
+        <span class="close-btn" onclick="closeProfileModal()">
+          <i class="fas fa-times"></i>
+        </span>
+      </div>
+      <form id="profile-form" onsubmit="saveProfile(event)">
+        <div class="form-group">
+          <label for="profile-name">
+            <i class="fas fa-user"></i> Full Name
+          </label>
+          <input type="text" id="profile-name" placeholder="Enter your name" maxlength="100" />
+        </div>
+        <div class="form-group">
+          <label for="profile-email">
+            <i class="fas fa-envelope"></i> Email
+          </label>
+          <input type="email" id="profile-email" placeholder="Enter your email" maxlength="100" />
+        </div>
+        <div class="form-group">
+          <label for="profile-phone">
+            <i class="fas fa-phone"></i> Phone
+          </label>
+          <input type="tel" id="profile-phone" placeholder="Enter your phone number" maxlength="20" />
+        </div>
+        <div class="form-group">
+          <label for="profile-bio">
+            <i class="fas fa-pen"></i> Bio
+          </label>
+          <textarea id="profile-bio" placeholder="Tell us about yourself..." maxlength="500"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="cancel-btn" onclick="closeProfileModal()">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+          <button type="submit" class="save-btn">
+            <i class="fas fa-check"></i> Save Profile
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Document Viewer Modal -->
+  <div id="document-modal" class="modal">
+    <div class="modal-overlay" onclick="closeDocumentModal()"></div>
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h2 id="modal-doc-name">Document</h2>
+        <span class="close-btn" onclick="closeDocumentModal()">
+          <i class="fas fa-times"></i>
+        </span>
+      </div>
+      <div class="document-info">
+        <p><strong>Uploaded:</strong> <span id="modal-doc-date">-</span></p>
+        <p><strong>Size:</strong> <span id="modal-doc-size">-</span></p>
+        <p><strong>Status:</strong> <span class="status-badge status-success">
+          <i class="fas fa-check-circle"></i> Processed
+        </span></p>
+      </div>
+      <div class="modal-actions">
+        <button class="cancel-btn" onclick="closeDocumentModal()">
+          <i class="fas fa-times"></i> Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
 </div>
 
 <script src="/static/chat.js"></script>
